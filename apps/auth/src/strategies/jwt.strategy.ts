@@ -3,7 +3,6 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
-import { Request } from 'express';
 import { TokenPayload } from '../interfaces/token-payload.interface';
 
 @Injectable()
