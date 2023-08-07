@@ -1,44 +1,44 @@
 import {
   Injectable,
-  UnprocessableEntityException,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UsersRepository } from './users.repository';
 import * as bcrypt from 'bcryptjs';
+import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserDto } from './dto/get-user.dto';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  async create(dto: CreateUserDto) {
-    await this.validateCreateUserDto(dto);
+  async create(createUserDto: CreateUserDto) {
+    await this.validateCreateUserDto(createUserDto);
     return this.usersRepository.create({
-      ...dto,
-      password: await bcrypt.hash(dto.password, 10),
+      ...createUserDto,
+      password: await bcrypt.hash(createUserDto.password, 10),
     });
   }
 
-  private async validateCreateUserDto(dto: CreateUserDto) {
+  private async validateCreateUserDto(createUserDto: CreateUserDto) {
     try {
-      await this.usersRepository.findOne({ email: dto.email });
-    } catch (error) {
+      await this.usersRepository.findOne({ email: createUserDto.email });
+    } catch (err) {
       return;
     }
-    throw new UnprocessableEntityException('Email already exists!');
+    throw new UnprocessableEntityException('Email already exists.');
   }
 
   async verifyUser(email: string, password: string) {
     const user = await this.usersRepository.findOne({ email });
     const passwordIsValid = await bcrypt.compare(password, user.password);
     if (!passwordIsValid) {
-      throw new UnauthorizedException('Credentials not valid!');
+      throw new UnauthorizedException('Credentials are not valid.');
     }
     return user;
   }
 
-  async getUser(dto: GetUserDto) {
-    return this.usersRepository.findOne(dto);
+  async getUser(getUserDto: GetUserDto) {
+    return this.usersRepository.findOne(getUserDto);
   }
 }

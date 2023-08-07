@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { UserDocument } from './users/models/users.schema';
-import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
 import { TokenPayload } from './interfaces/token-payload.interface';
+import { UserDocument } from './users/models/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -12,20 +12,21 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(user: UserDocument, res: Response) {
-    const tokenPayLoad: TokenPayload = {
+  async login(user: UserDocument, response: Response) {
+    const tokenPayload: TokenPayload = {
       userId: user._id.toHexString(),
     };
+
     const expires = new Date();
     expires.setSeconds(
-      expires.getSeconds() +
-        parseInt(this.configService.get<string>('JWT_EXPIRATION')),
+      expires.getSeconds() + this.configService.get('JWT_EXPIRATION'),
     );
 
-    const token = this.jwtService.sign(tokenPayLoad); 
-    res.cookie('Authentication', token, {
-      expires,
+    const token = this.jwtService.sign(tokenPayload);
+
+    response.cookie('Authentication', token, {
       httpOnly: true,
+      expires,
     });
   }
 }
